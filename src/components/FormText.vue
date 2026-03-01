@@ -1,23 +1,23 @@
 <script setup>
-import { ref } from 'vue';
-const libelle = ref(''); // c’est une variable réactive
-const emit = defineEmits(['eventAdd']); // définir l'événement eventAdd
+  import { ref } from 'vue'
+  const texte = ref('') // c’est une variable réactive
+  defineEmits(['event-submit']) // définir l'événement event-submit
 </script>
 <template>
   <v-container>
     <v-form
       @submit.prevent="
-        $emit('eventSubmit', texte);
+        $emit('event-submit', texte);
         texte = '';
       "
     >
       <v-text-field
         v-model="texte"
-        label="Critère de recherche"
-        variant="outlined"
         dense
-      ></v-text-field>
-      <v-btn type="submit" color="primary">Rechercher</v-btn>
+        label="Rechercher un médicament"
+        variant="outlined"
+      />
+      <v-btn color="primary" type="submit">Rechercher</v-btn>
     </v-form>
   </v-container>
 </template>

@@ -11,12 +11,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AffichListFilms: typeof import('./src/components/AffichListFilms.vue')['default']
-    AfiichListFilms: typeof import('./src/components/AfiichListFilms.vue')['default']
+    AffichListMedicaments: typeof import('./src/components/AffichListMedicaments.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
-    Films: typeof import('./src/components/Films.vue')['default']
     FormText: typeof import('./src/components/FormText.vue')['default']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    Medicaments: typeof import('./src/components/Medicaments.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

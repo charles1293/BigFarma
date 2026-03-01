@@ -20,12 +20,7 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/pageAbout': RouteRecordInfo<'/pageAbout', '/pageAbout', Record<never, never>, Record<never, never>>,
-    '/pageActeurs': RouteRecordInfo<'/pageActeurs', '/pageActeurs', Record<never, never>, Record<never, never>>,
-    '/pageChoix1': RouteRecordInfo<'/pageChoix1', '/pageChoix1', Record<never, never>, Record<never, never>>,
-    '/pageChoix2': RouteRecordInfo<'/pageChoix2', '/pageChoix2', Record<never, never>, Record<never, never>>,
-    '/pageFilms': RouteRecordInfo<'/pageFilms', '/pageFilms', Record<never, never>, Record<never, never>>,
-    '/pageItem1': RouteRecordInfo<'/pageItem1', '/pageItem1', Record<never, never>, Record<never, never>>,
-    '/pageItem2': RouteRecordInfo<'/pageItem2', '/pageItem2', Record<never, never>, Record<never, never>>,
+    '/pageMedicaments': RouteRecordInfo<'/pageMedicaments', '/pageMedicaments', Record<never, never>, Record<never, never>>,
   }
 
   /**
@@ -47,28 +42,8 @@ declare module 'vue-router/auto-routes' {
       routes: '/pageAbout'
       views: never
     }
-    'src/pages/pageActeurs.vue': {
-      routes: '/pageActeurs'
-      views: never
-    }
-    'src/pages/pageChoix1.vue': {
-      routes: '/pageChoix1'
-      views: never
-    }
-    'src/pages/pageChoix2.vue': {
-      routes: '/pageChoix2'
-      views: never
-    }
-    'src/pages/pageFilms.vue': {
-      routes: '/pageFilms'
-      views: never
-    }
-    'src/pages/pageItem1.vue': {
-      routes: '/pageItem1'
-      views: never
-    }
-    'src/pages/pageItem2.vue': {
-      routes: '/pageItem2'
+    'src/pages/pageMedicaments.vue': {
+      routes: '/pageMedicaments'
       views: never
     }
   }
