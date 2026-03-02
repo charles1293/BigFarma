@@ -1,9 +1,18 @@
 <script setup>
-  import { onMounted, reactive } from 'vue'
+  import { computed, onMounted, reactive } from 'vue'
   import Medicament from '@/Medicament.js'
+
+  const props = defineProps(['critere'])
 
   const url = 'https://apipharmacie.pecatte.fr/api/7/medicaments'
   const listeMedicaments = reactive([])
+
+  const medicamentsFiltres = computed(() => {
+    if (!props.critere) return listeMedicaments
+    return listeMedicaments.filter(m =>
+      m.denomination.toLowerCase().includes(props.critere.toLowerCase()),
+    )
+  })
 
   function getMedicaments () {
     const fetchOptions = { method: 'GET' }
@@ -12,6 +21,7 @@
         return response.json()
       })
       .then(dataJSON => {
+        listeMedicaments.length = 0
         for (const result of dataJSON) {
           const medicament = new Medicament(result)
           listeMedicaments.push(medicament)
@@ -32,7 +42,7 @@
   <h3>Liste des médicaments</h3>
   <v-row dense>
     <v-col
-      v-for="medicament in listeMedicaments"
+      v-for="medicament in medicamentsFiltres"
       :key="medicament.id"
       cols="12"
       lg="3"
