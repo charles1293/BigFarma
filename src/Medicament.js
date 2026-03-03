@@ -24,6 +24,10 @@ export default class Medicament {
     return this._qte
   }
 
+  set qte (value) {
+    this._qte = value
+  }
+
   get photo () {
     return this._photo
   }

@@ -33,6 +33,30 @@
       })
   }
 
+  function updateQte (medicament, x) {
+    medicament.qte += x
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: medicament.id,
+        denomination: medicament.denomination,
+        formepharmaceutique: medicament.formepharmaceutique,
+        qte: medicament.qte,
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          medicament.qte -= x
+          console.error('Erreur lors de la mise à jour')
+        }
+      })
+      .catch(error => {
+        medicament.qte -= x
+        console.error(error)
+      })
+  }
+
   onMounted(() => {
     getMedicaments()
   })
@@ -72,6 +96,10 @@
         <v-card-text>
           Quantité en stock : {{ medicament.qte }}
         </v-card-text>
+        <v-card-actions>
+          <v-btn @click="updateQte(medicament, 1)">+</v-btn>
+          <v-btn @click="updateQte(medicament, -1)">-</v-btn>
+        </v-card-actions>
       </v-card>
     </v-col>
   </v-row>
