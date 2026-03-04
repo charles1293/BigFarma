@@ -48,11 +48,30 @@
       .then(response => {
         if (!response.ok) {
           medicament.qte -= x
-          console.error('Erreur lors de la mise à jour')
+          console.error('MAJ impossible')
         }
       })
       .catch(error => {
         medicament.qte -= x
+        console.error(error)
+      })
+  }
+
+  function deleteMedicament (medicament) {
+    fetch(url + '/' + medicament.id, {
+      method: 'DELETE',
+    })
+      .then(response => {
+        if (response.ok) {
+          const index = listeMedicaments.findIndex(m => m.id === medicament.id)
+          if (index !== -1) {
+            listeMedicaments.splice(index, 1)
+          }
+        } else {
+          console.error('aie aie peut pas supp')
+        }
+      })
+      .catch(error => {
         console.error(error)
       })
   }
@@ -99,6 +118,7 @@
         <v-card-actions>
           <v-btn @click="updateQte(medicament, 1)">+</v-btn>
           <v-btn @click="updateQte(medicament, -1)">-</v-btn>
+          <v-btn @click="deleteMedicament(medicament)">Supp</v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
