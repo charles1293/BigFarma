@@ -43,6 +43,7 @@
         denomination: medicament.denomination,
         formepharmaceutique: medicament.formepharmaceutique,
         qte: medicament.qte,
+        photo: medicament.photo,
       }),
     })
       .then(response => {
@@ -77,13 +78,25 @@
   }
 
   const dialogModif = ref()
+
   const editForm = reactive({
     id: null,
     denomination: '',
     formepharmaceutique: '',
     qte: 0,
+    photo: null,
   })
   let medicamentEnCours = null
+
+  function ajouterMedicament () {
+    medicamentEnCours = null // variable qui perment de de faire la diff entre création et modif
+    editForm.id = null
+    editForm.denomination = ''
+    editForm.formepharmaceutique = ''
+    editForm.qte = 0
+    editForm.photo = null
+    dialogModif.value = true
+  }
 
   function modifMedicament (medicament) {
     medicamentEnCours = medicament
@@ -91,34 +104,65 @@
     editForm.denomination = medicament.denomination
     editForm.formepharmaceutique = medicament.formepharmaceutique
     editForm.qte = medicament.qte
+    editForm.photo = medicament.photo
     dialogModif.value = true
   }
 
   function validerModif () {
-    const old = {
-      denomination: medicamentEnCours.denomination,
-      formepharmaceutique: medicamentEnCours.formepharmaceutique,
-      qte: medicamentEnCours.qte,
+    const payload = {
+      denomination: editForm.denomination,
+      formepharmaceutique: editForm.formepharmaceutique,
+      qte: editForm.qte,
+      photo: editForm.photo,
     }
-    medicamentEnCours.denomination = editForm.denomination
-    medicamentEnCours.formepharmaceutique = editForm.formepharmaceutique
-    medicamentEnCours.qte = Number(editForm.qte)
-    fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: medicamentEnCours.id,
+
+    if (medicamentEnCours !== null) {
+      // Modif
+      payload.id = medicamentEnCours.id
+
+      const old = {
         denomination: medicamentEnCours.denomination,
         formepharmaceutique: medicamentEnCours.formepharmaceutique,
         qte: medicamentEnCours.qte,
-      }),
-    })
-      .catch(error => {
+        photo: medicamentEnCours.photo,
+      }
+
+      medicamentEnCours.denomination = editForm.denomination
+      medicamentEnCours.formepharmaceutique = editForm.formepharmaceutique
+      medicamentEnCours.qte = Number(editForm.qte)
+      medicamentEnCours.photo = editForm.photo
+
+      fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+
+      }).catch(error => {
         medicamentEnCours.denomination = old.denomination
         medicamentEnCours.formepharmaceutique = old.formepharmaceutique
         medicamentEnCours.qte = old.qte
+        medicamentEnCours.photo = old.photo
         console.error(error)
       })
+    } else {
+      // Ajout
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(response => {
+          if (response.ok) {
+            getMedicaments()
+          } else {
+            console.error('Erreur lors de la création')
+          }
+        })
+        .catch(error => {
+          console.error(error)
+        })
+    }
+
     dialogModif.value = false
   }
 
@@ -129,6 +173,9 @@
 
 <template>
   <h3>Liste des médicaments</h3>
+
+  <v-btn class="mb-4 ml-2" color="success" @click="ajouterMedicament">Ajouter un médicament</v-btn>
+
   <v-row dense>
     <v-col
       v-for="medicament in medicamentsFiltres"
@@ -172,11 +219,12 @@
   </v-row>
 
   <v-dialog v-model="dialogModif">
-    <v-card title="Modifier le médicament">
+    <v-card title="Modifier / Ajouter">
       <v-card-text>
         <v-text-field v-model="editForm.denomination" label="Dénomination" />
         <v-text-field v-model="editForm.formepharmaceutique" label="Forme" />
         <v-text-field v-model.number="editForm.qte" label="Quantité" />
+        <v-text-field v-model="editForm.photo" label="Nom de la photo" />
       </v-card-text>
       <v-card-actions>
         <v-spacer />

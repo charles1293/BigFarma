@@ -40,6 +40,10 @@ export default class Medicament {
     return this._photo
   }
 
+  set photo (value) {
+    this._photo = value
+  }
+
   toString () {
     return `--> ${this._denomination} (${this._formepharmaceutique}) - Qté: ${this._qte}`
   }
