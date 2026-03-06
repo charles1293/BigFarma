@@ -16,8 +16,16 @@ export default class Medicament {
     return this._denomination
   }
 
+  set denomination (value) {
+    this._denomination = value
+  }
+
   get formepharmaceutique () {
     return this._formepharmaceutique
+  }
+
+  set formepharmaceutique (value) {
+    this._formepharmaceutique = value
   }
 
   get qte () {

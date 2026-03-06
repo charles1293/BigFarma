@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, reactive } from 'vue'
+  import { computed, onMounted, reactive, ref } from 'vue'
   import Medicament from '@/Medicament.js'
 
   const props = defineProps(['critere'])
@@ -76,6 +76,52 @@
       })
   }
 
+  const dialogModif = ref()
+  const editForm = reactive({
+    id: null,
+    denomination: '',
+    formepharmaceutique: '',
+    qte: 0,
+  })
+  let medicamentEnCours = null
+
+  function modifMedicament (medicament) {
+    medicamentEnCours = medicament
+    editForm.id = medicament.id
+    editForm.denomination = medicament.denomination
+    editForm.formepharmaceutique = medicament.formepharmaceutique
+    editForm.qte = medicament.qte
+    dialogModif.value = true
+  }
+
+  function validerModif () {
+    const old = {
+      denomination: medicamentEnCours.denomination,
+      formepharmaceutique: medicamentEnCours.formepharmaceutique,
+      qte: medicamentEnCours.qte,
+    }
+    medicamentEnCours.denomination = editForm.denomination
+    medicamentEnCours.formepharmaceutique = editForm.formepharmaceutique
+    medicamentEnCours.qte = Number(editForm.qte)
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: medicamentEnCours.id,
+        denomination: medicamentEnCours.denomination,
+        formepharmaceutique: medicamentEnCours.formepharmaceutique,
+        qte: medicamentEnCours.qte,
+      }),
+    })
+      .catch(error => {
+        medicamentEnCours.denomination = old.denomination
+        medicamentEnCours.formepharmaceutique = old.formepharmaceutique
+        medicamentEnCours.qte = old.qte
+        console.error(error)
+      })
+    dialogModif.value = false
+  }
+
   onMounted(() => {
     getMedicaments()
   })
@@ -119,8 +165,32 @@
           <v-btn @click="updateQte(medicament, 1)">+</v-btn>
           <v-btn @click="updateQte(medicament, -1)">-</v-btn>
           <v-btn @click="deleteMedicament(medicament)">Supp</v-btn>
+          <v-btn @click="modifMedicament(medicament)">Modifier</v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
   </v-row>
+
+  <v-dialog v-model="dialogModif">
+    <v-card title="Modifier le médicament">
+      <v-card-text>
+        <v-text-field v-model="editForm.denomination" label="Dénomination" />
+        <v-text-field v-model="editForm.formepharmaceutique" label="Forme" />
+        <v-text-field v-model.number="editForm.qte" label="Quantité" />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn @click="dialogModif = false">Annuler</v-btn>
+        <v-btn color="primary" @click="validerModif">Valider</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
+
+<style scoped>
+.v-btn {
+  min-width: 32px;
+  padding: 10px;
+  border: 1px solid white;
+}
+</style>
