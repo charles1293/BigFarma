@@ -4,13 +4,13 @@
 
   const props = defineProps(['critere'])
 
-  const url = 'https://apipharmacie.pecatte.fr/api/7/medicaments'
+  const url = 'https://mini-proj-y2lk.onrender.com/api/medicaments'
   const listeMedicaments = reactive([])
 
   const medicamentsFiltres = computed(() => {
     if (!props.critere) return listeMedicaments
     return listeMedicaments.filter(m =>
-      m.denomination.toLowerCase().includes(props.critere.toLowerCase()),
+      m.nom.toLowerCase().includes(props.critere.toLowerCase()),
     )
   })
 
@@ -22,7 +22,8 @@
       })
       .then(dataJSON => {
         listeMedicaments.length = 0
-        for (const result of dataJSON) {
+        const medicaments = dataJSON._embedded?.medicaments ?? []
+        for (const result of medicaments) {
           const medicament = new Medicament(result)
           listeMedicaments.push(medicament)
         }
@@ -34,37 +35,33 @@
   }
 
   function updateQte (medicament, x) {
-    medicament.qte += x
-    fetch(url, {
-      method: 'PUT',
+    medicament.unitesEnStock += x
+    fetch(url + '/' + medicament.reference, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: medicament.id,
-        denomination: medicament.denomination,
-        formepharmaceutique: medicament.formepharmaceutique,
-        qte: medicament.qte,
-        photo: medicament.photo,
+        unitesEnStock: medicament.unitesEnStock,
       }),
     })
       .then(response => {
         if (!response.ok) {
-          medicament.qte -= x
+          medicament.unitesEnStock -= x
           console.error('MAJ impossible')
         }
       })
       .catch(error => {
-        medicament.qte -= x
+        medicament.unitesEnStock -= x
         console.error(error)
       })
   }
 
   function deleteMedicament (medicament) {
-    fetch(url + '/' + medicament.id, {
+    fetch(url + '/' + medicament.reference, {
       method: 'DELETE',
     })
       .then(response => {
         if (response.ok) {
-          const index = listeMedicaments.findIndex(m => m.id === medicament.id)
+          const index = listeMedicaments.findIndex(m => m.reference === medicament.reference)
           if (index !== -1) {
             listeMedicaments.splice(index, 1)
           }
@@ -80,68 +77,82 @@
   const dialogModif = ref()
 
   const editForm = reactive({
-    id: null,
-    denomination: '',
-    formepharmaceutique: '',
-    qte: 0,
-    photo: null,
+    reference: null,
+    nom: '',
+    quantiteParUnite: '',
+    prixUnitaire: 0,
+    unitesEnStock: 0,
+    imageURL: '',
   })
   let medicamentEnCours = null
 
   function ajouterMedicament () {
     medicamentEnCours = null // variable qui perment de de faire la diff entre création et modif
-    editForm.id = null
-    editForm.denomination = ''
-    editForm.formepharmaceutique = ''
-    editForm.qte = 0
-    editForm.photo = null
+    editForm.reference = null
+    editForm.nom = ''
+    editForm.quantiteParUnite = ''
+    editForm.prixUnitaire = 0
+    editForm.unitesEnStock = 0
+    editForm.imageURL = ''
     dialogModif.value = true
   }
 
   function modifMedicament (medicament) {
     medicamentEnCours = medicament
-    editForm.id = medicament.id
-    editForm.denomination = medicament.denomination
-    editForm.formepharmaceutique = medicament.formepharmaceutique
-    editForm.qte = medicament.qte
-    editForm.photo = medicament.photo
+    editForm.reference = medicament.reference
+    editForm.nom = medicament.nom
+    editForm.quantiteParUnite = medicament.quantiteParUnite
+    editForm.prixUnitaire = medicament.prixUnitaire
+    editForm.unitesEnStock = medicament.unitesEnStock
+    editForm.imageURL = medicament.imageURL
     dialogModif.value = true
   }
 
   function validerModif () {
     const payload = {
-      denomination: editForm.denomination,
-      formepharmaceutique: editForm.formepharmaceutique,
-      qte: editForm.qte,
-      photo: editForm.photo,
+      nom: editForm.nom,
+      quantiteParUnite: editForm.quantiteParUnite,
+      prixUnitaire: Number(editForm.prixUnitaire),
+      unitesEnStock: Number(editForm.unitesEnStock),
+      imageURL: editForm.imageURL,
     }
 
     if (medicamentEnCours !== null) {
       // Modif
-      payload.id = medicamentEnCours.id
-
       const old = {
-        denomination: medicamentEnCours.denomination,
-        formepharmaceutique: medicamentEnCours.formepharmaceutique,
-        qte: medicamentEnCours.qte,
-        photo: medicamentEnCours.photo,
+        nom: medicamentEnCours.nom,
+        quantiteParUnite: medicamentEnCours.quantiteParUnite,
+        prixUnitaire: medicamentEnCours.prixUnitaire,
+        unitesEnStock: medicamentEnCours.unitesEnStock,
+        imageURL: medicamentEnCours.imageURL,
       }
 
-      medicamentEnCours.denomination = editForm.denomination
-      medicamentEnCours.formepharmaceutique = editForm.formepharmaceutique
-      medicamentEnCours.qte = Number(editForm.qte)
-      medicamentEnCours.photo = editForm.photo
+      medicamentEnCours.nom = editForm.nom
+      medicamentEnCours.quantiteParUnite = editForm.quantiteParUnite
+      medicamentEnCours.prixUnitaire = Number(editForm.prixUnitaire)
+      medicamentEnCours.unitesEnStock = Number(editForm.unitesEnStock)
+      medicamentEnCours.imageURL = editForm.imageURL
 
-      fetch(url, {
-        method: 'PUT',
+      fetch(url + '/' + medicamentEnCours.reference, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
 
+      }).then(response => {
+        if (!response.ok) {
+          medicamentEnCours.nom = old.nom
+          medicamentEnCours.quantiteParUnite = old.quantiteParUnite
+          medicamentEnCours.prixUnitaire = old.prixUnitaire
+          medicamentEnCours.unitesEnStock = old.unitesEnStock
+          medicamentEnCours.imageURL = old.imageURL
+          console.error('MAJ impossible', response.status)
+        }
       }).catch(error => {
-        medicamentEnCours.denomination = old.denomination
-        medicamentEnCours.formepharmaceutique = old.formepharmaceutique
-        medicamentEnCours.qte = old.qte
-        medicamentEnCours.photo = old.photo
+        medicamentEnCours.nom = old.nom
+        medicamentEnCours.quantiteParUnite = old.quantiteParUnite
+        medicamentEnCours.prixUnitaire = old.prixUnitaire
+        medicamentEnCours.unitesEnStock = old.unitesEnStock
+        medicamentEnCours.imageURL = old.imageURL
         console.error(error)
       })
     } else {
@@ -179,7 +190,7 @@
   <v-row dense>
     <v-col
       v-for="medicament in medicamentsFiltres"
-      :key="medicament.id"
+      :key="medicament.reference"
       cols="12"
       lg="3"
       md="4"
@@ -188,10 +199,10 @@
     >
       <v-card class="ma-2" color="primary" elevation="4">
         <v-img
-          v-if="medicament.photo"
+          v-if="medicament.imageURL"
           cover
           height="200px"
-          :src="'https://apipharmacie.pecatte.fr/images/' + medicament.photo"
+          :src="medicament.imageURL"
         />
         <v-img
           v-else
@@ -200,13 +211,13 @@
           src="https://via.placeholder.com/300x200?text=Pas+de+photo"
         />
         <v-card-title>
-          {{ medicament.denomination }}
+          {{ medicament.nom }}
         </v-card-title>
         <v-card-subtitle>
-          {{ medicament.formepharmaceutique }}
+          {{ medicament.quantiteParUnite }} — {{ medicament.prixUnitaire }} €
         </v-card-subtitle>
         <v-card-text>
-          Quantité en stock : {{ medicament.qte }}
+          Quantité en stock : {{ medicament.unitesEnStock }}
         </v-card-text>
         <v-card-actions>
           <v-btn @click="updateQte(medicament, 1)">+</v-btn>
@@ -221,10 +232,11 @@
   <v-dialog v-model="dialogModif">
     <v-card title="Modifier / Ajouter">
       <v-card-text>
-        <v-text-field v-model="editForm.denomination" label="Dénomination" />
-        <v-text-field v-model="editForm.formepharmaceutique" label="Forme" />
-        <v-text-field v-model.number="editForm.qte" label="Quantité" />
-        <v-text-field v-model="editForm.photo" label="Nom de la photo" />
+        <v-text-field v-model="editForm.nom" label="Nom" />
+        <v-text-field v-model="editForm.quantiteParUnite" label="Quantité par unité" />
+        <v-text-field v-model.number="editForm.prixUnitaire" label="Prix unitaire" />
+        <v-text-field v-model.number="editForm.unitesEnStock" label="Unités en stock" />
+        <v-text-field v-model="editForm.imageURL" label="URL de l'image" />
       </v-card-text>
       <v-card-actions>
         <v-spacer />

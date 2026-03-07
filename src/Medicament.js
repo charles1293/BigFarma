@@ -1,50 +1,86 @@
 export default class Medicament {
   constructor (medicamentJSON) {
     // en paramètre un médicament au format JSON
-    this._id = medicamentJSON.id
-    this._denomination = medicamentJSON.denomination
-    this._formepharmaceutique = medicamentJSON.formepharmaceutique ?? ''
-    this._qte = medicamentJSON.qte ?? 0
-    this._photo = medicamentJSON.photo ?? ''
+    this._reference = medicamentJSON.reference
+    this._nom = medicamentJSON.nom
+    this._quantiteParUnite = medicamentJSON.quantiteParUnite ?? ''
+    this._prixUnitaire = medicamentJSON.prixUnitaire ?? 0
+    this._unitesEnStock = medicamentJSON.unitesEnStock ?? 0
+    this._unitesCommandees = medicamentJSON.unitesCommandees ?? 0
+    this._niveauDeReappro = medicamentJSON.niveauDeReappro ?? 0
+    this._indisponible = medicamentJSON.indisponible ?? false
+    this._imageURL = medicamentJSON.imageURL ?? ''
   }
 
-  get id () {
-    return this._id
+  get reference () {
+    return this._reference
   }
 
-  get denomination () {
-    return this._denomination
+  get nom () {
+    return this._nom
   }
 
-  set denomination (value) {
-    this._denomination = value
+  set nom (value) {
+    this._nom = value
   }
 
-  get formepharmaceutique () {
-    return this._formepharmaceutique
+  get quantiteParUnite () {
+    return this._quantiteParUnite
   }
 
-  set formepharmaceutique (value) {
-    this._formepharmaceutique = value
+  set quantiteParUnite (value) {
+    this._quantiteParUnite = value
   }
 
-  get qte () {
-    return this._qte
+  get prixUnitaire () {
+    return this._prixUnitaire
   }
 
-  set qte (value) {
-    this._qte = value
+  set prixUnitaire (value) {
+    this._prixUnitaire = value
   }
 
-  get photo () {
-    return this._photo
+  get unitesEnStock () {
+    return this._unitesEnStock
   }
 
-  set photo (value) {
-    this._photo = value
+  set unitesEnStock (value) {
+    this._unitesEnStock = value
+  }
+
+  get unitesCommandees () {
+    return this._unitesCommandees
+  }
+
+  set unitesCommandees (value) {
+    this._unitesCommandees = value
+  }
+
+  get niveauDeReappro () {
+    return this._niveauDeReappro
+  }
+
+  set niveauDeReappro (value) {
+    this._niveauDeReappro = value
+  }
+
+  get indisponible () {
+    return this._indisponible
+  }
+
+  set indisponible (value) {
+    this._indisponible = value
+  }
+
+  get imageURL () {
+    return this._imageURL
+  }
+
+  set imageURL (value) {
+    this._imageURL = value
   }
 
   toString () {
-    return `--> ${this._denomination} (${this._formepharmaceutique}) - Qté: ${this._qte}`
+    return `--> ${this._nom} (${this._quantiteParUnite}) - Stock: ${this._unitesEnStock}`
   }
 }
