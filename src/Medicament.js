@@ -10,6 +10,7 @@ export default class Medicament {
     this._niveauDeReappro = medicamentJSON.niveauDeReappro ?? 0
     this._indisponible = medicamentJSON.indisponible ?? false
     this._imageURL = medicamentJSON.imageURL ?? ''
+    this._categorieUrl = medicamentJSON._links?.categorie?.href ?? ''
   }
 
   get reference () {
@@ -78,6 +79,14 @@ export default class Medicament {
 
   set imageURL (value) {
     this._imageURL = value
+  }
+
+  get categorieUrl () {
+    return this._categorieUrl
+  }
+
+  set categorieUrl (value) {
+    this._categorieUrl = value
   }
 
   toString () {

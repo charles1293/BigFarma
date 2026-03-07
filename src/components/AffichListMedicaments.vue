@@ -6,6 +6,19 @@
 
   const url = 'https://mini-proj-y2lk.onrender.com/api/medicaments'
   const listeMedicaments = reactive([])
+  const listeCategories = reactive([])
+
+  function getCategories () {
+    fetch('https://mini-proj-y2lk.onrender.com/api/categories?size=100')
+      .then(r => r.json())
+      .then(data => {
+        listeCategories.length = 0
+        for (const cat of data._embedded?.categories ?? []) {
+          listeCategories.push({ code: cat.code, libelle: cat.libelle, url: cat._links.self.href })
+        }
+      })
+      .catch(console.error)
+  }
 
   const medicamentsFiltres = computed(() => {
     if (!props.critere) return listeMedicaments
@@ -16,7 +29,7 @@
 
   function getMedicaments () {
     const fetchOptions = { method: 'GET' }
-    fetch(url, fetchOptions)
+    fetch(url + '?size=1000', fetchOptions)
       .then(response => {
         return response.json()
       })
@@ -83,6 +96,7 @@
     prixUnitaire: 0,
     unitesEnStock: 0,
     imageURL: '',
+    categorieUrl: '',
   })
   let medicamentEnCours = null
 
@@ -94,6 +108,7 @@
     editForm.prixUnitaire = 0
     editForm.unitesEnStock = 0
     editForm.imageURL = ''
+    editForm.categorieUrl = listeCategories[0]?.url ?? ''
     dialogModif.value = true
   }
 
@@ -105,20 +120,24 @@
     editForm.prixUnitaire = medicament.prixUnitaire
     editForm.unitesEnStock = medicament.unitesEnStock
     editForm.imageURL = medicament.imageURL
+    editForm.categorieUrl = medicament.categorieUrl
     dialogModif.value = true
   }
 
   function validerModif () {
-    const payload = {
-      nom: editForm.nom,
-      quantiteParUnite: editForm.quantiteParUnite,
-      prixUnitaire: Number(editForm.prixUnitaire),
-      unitesEnStock: Number(editForm.unitesEnStock),
-      imageURL: editForm.imageURL,
-    }
-
     if (medicamentEnCours !== null) {
-      // Modif
+      // Modif — build payload with ALL fields to avoid nulling out non-edited ones
+      const payload = {
+        nom: editForm.nom,
+        quantiteParUnite: editForm.quantiteParUnite,
+        prixUnitaire: Number(editForm.prixUnitaire),
+        unitesEnStock: Number(editForm.unitesEnStock),
+        imageURL: editForm.imageURL,
+        unitesCommandees: medicamentEnCours.unitesCommandees,
+        niveauDeReappro: medicamentEnCours.niveauDeReappro,
+        indisponible: medicamentEnCours.indisponible,
+      }
+
       const old = {
         nom: medicamentEnCours.nom,
         quantiteParUnite: medicamentEnCours.quantiteParUnite,
@@ -134,7 +153,7 @@
       medicamentEnCours.imageURL = editForm.imageURL
 
       fetch(url + '/' + medicamentEnCours.reference, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
 
@@ -157,6 +176,14 @@
       })
     } else {
       // Ajout
+      const payload = {
+        nom: editForm.nom,
+        quantiteParUnite: editForm.quantiteParUnite,
+        prixUnitaire: Number(editForm.prixUnitaire),
+        unitesEnStock: Number(editForm.unitesEnStock),
+        imageURL: editForm.imageURL,
+        categorie: editForm.categorieUrl,
+      }
       fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,6 +205,7 @@
   }
 
   onMounted(() => {
+    getCategories()
     getMedicaments()
   })
 </script>
@@ -237,6 +265,13 @@
         <v-text-field v-model.number="editForm.prixUnitaire" label="Prix unitaire" />
         <v-text-field v-model.number="editForm.unitesEnStock" label="Unités en stock" />
         <v-text-field v-model="editForm.imageURL" label="URL de l'image" />
+        <v-select
+          v-model="editForm.categorieUrl"
+          :items="listeCategories"
+          item-title="libelle"
+          item-value="url"
+          label="Catégorie"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
